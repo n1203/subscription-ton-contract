@@ -13,8 +13,10 @@ PROGRAM{
   DECLPROC $DeployOk$_store
   DECLPROC $DeployOk$_store_cell
   DECLPROC $UpdatePrice$_load
+  DECLPROC $UpdateFeeRate$_load
   DECLPROC $Withdraw$_load
   DECLPROC $Subscribe$_load
+  DECLPROC $Refund$_load
   DECLPROC $SubscriptionContract$_store
   DECLPROC $SubscriptionContract$_load
   DECLPROC $StateInit$_not_null
@@ -25,9 +27,10 @@ PROGRAM{
   DECLPROC $global_send
   DECLPROC $SubscriptionContract$_fun_requireOwner
   DECLPROC $SubscriptionContract$_fun_checkSubscription
-  DECLPROC $SubscriptionContract$_fun_getExpiryTime
-  DECLPROC $SubscriptionContract$_fun_getPrice
-  DECLPROC $SubscriptionContract$_fun_getBalance
+  DECLPROC $SubscriptionContract$_fun_expiryTime
+  DECLPROC $SubscriptionContract$_fun_price
+  DECLPROC $SubscriptionContract$_fun_balance
+  DECLPROC $SubscriptionContract$_fun_feeRate
   DECLPROC $SendParameters$_constructor_bounce_to_value_mode_body_code_data
   DECLPROC $SubscriptionContract$_fun_forward
   DECLPROC $SubscriptionContract$_fun_reply
@@ -35,13 +38,16 @@ PROGRAM{
   DECLPROC $SendParameters$_constructor_to_value_mode
   DECLPROC $DeployOk$_constructor_queryId
   DECLPROC $SubscriptionContract$_internal_binary_UpdatePrice
+  DECLPROC $SubscriptionContract$_internal_binary_UpdateFeeRate
   DECLPROC $SubscriptionContract$_internal_binary_Withdraw
   DECLPROC $SubscriptionContract$_internal_binary_Subscribe
+  DECLPROC $SubscriptionContract$_internal_binary_Refund
   DECLPROC $SubscriptionContract$_internal_binary_Deploy
   121470 DECLMETHOD %checkSubscription
-  94419 DECLMETHOD %getExpiryTime
-  73359 DECLMETHOD %getPrice
-  106323 DECLMETHOD %getBalance
+  107514 DECLMETHOD %expiryTime
+  120091 DECLMETHOD %price
+  104128 DECLMETHOD %balance
+  129083 DECLMETHOD %feeRate
   115390 DECLMETHOD lazy_deployment_completed
   DECLPROC $SubscriptionContract$_contract_router_internal
   DECLPROC recv_internal
@@ -151,6 +157,15 @@ PROGRAM{
     LDVARUINT16
     SWAP
   }>
+  $UpdateFeeRate$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    4057368648 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    32 LDU
+    SWAP
+  }>
   $Withdraw$_load PROCINLINE:<{
     32 LDU
     SWAP
@@ -168,13 +183,23 @@ PROGRAM{
     129 THROWIFNOT
     PUSHNULL
   }>
-  $SubscriptionContract$_store PROCINLINE:<{
-    s4 s3 XCHG2
-    __tact_store_address INLINECALLDICT
+  $Refund$_load PROCINLINE:<{
+    32 LDU
     SWAP
-    STVARUINT16
+    2910599901 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    PUSHNULL
+  }>
+  $SubscriptionContract$_store PROCINLINE:<{
+    s5 s4 XCHG2
+    __tact_store_address INLINECALLDICT
     ROT
     STVARUINT16
+    SWAP
+    STVARUINT16
+    s1 s2 XCHG
+    32 STU
     STDICT
   }>
   $SubscriptionContract$_load PROCINLINE:<{
@@ -182,8 +207,9 @@ PROGRAM{
     SWAP
     LDVARUINT16
     LDVARUINT16
+    32 LDU
     LDDICT
-    4 -ROLL
+    5 -ROLL
   }>
   $StateInit$_not_null PROCINLINE:<{
     DUP
@@ -199,6 +225,8 @@ PROGRAM{
     1000000000 PUSHINT
     0 PUSHINT
     ROT
+    1000 PUSHINT
+    SWAP
   }>
   $SubscriptionContract$_contract_load PROCREF:<{
     c4 PUSH
@@ -210,7 +238,7 @@ PROGRAM{
     SWAP
     IFJMP:<{
       $SubscriptionContract$_load INLINECALLDICT
-      1 4 BLKDROP2
+      1 5 BLKDROP2
     }>
     MYADDR
     11 PLDU
@@ -230,7 +258,7 @@ PROGRAM{
     TRUE
     SWAP
     1 STI
-    4 -ROLL
+    5 -ROLL
     $SubscriptionContract$_store INLINECALLDICT
     ENDC
     c4 POP
@@ -341,7 +369,7 @@ PROGRAM{
     __tact_context_get INLINECALLDICT
     s2 s3 XCHG
     3 BLKDROP
-    s4 PUSH
+    s5 PUSH
     16053 PUSHINT
     s0 s2 XCHG
     __tact_slice_eq_bits INLINECALLDICT
@@ -363,7 +391,7 @@ PROGRAM{
         NOW
     GREATER
   }>
-  $SubscriptionContract$_fun_getExpiryTime PROCREF:<{
+  $SubscriptionContract$_fun_expiryTime PROCREF:<{
     267 PUSHINT
     s2 PUSH
     s0 s2 XCHG
@@ -371,10 +399,13 @@ PROGRAM{
     __tact_dict_get_slice_int INLINECALLDICT
     __tact_not_null INLINECALLDICT
   }>
-  $SubscriptionContract$_fun_getPrice PROCREF:<{
+  $SubscriptionContract$_fun_price PROCREF:<{
+    s3 PUSH
+  }>
+  $SubscriptionContract$_fun_balance PROCREF:<{
     s2 PUSH
   }>
-  $SubscriptionContract$_fun_getBalance PROCREF:<{
+  $SubscriptionContract$_fun_feeRate PROCREF:<{
     OVER
   }>
   $SendParameters$_constructor_bounce_to_value_mode_body_code_data PROCINLINE:<{
@@ -426,30 +457,50 @@ PROGRAM{
   $DeployOk$_constructor_queryId PROCINLINE:<{
   }>
   $SubscriptionContract$_internal_binary_UpdatePrice PROCINLINE:<{
-    4 -ROLL
+    5 -ROLL
     $SubscriptionContract$_fun_requireOwner INLINECALLDICT
-    s2 POP
+    s3 POP
     50036 PUSHINT
-    s4 PUSH
+    s5 PUSH
     0 GTINT
     THROWANYIFNOT
-    s3 s0 s0 XCHG3
+    s3 s4 XCHG
+    ROT
+  }>
+  $SubscriptionContract$_internal_binary_UpdateFeeRate PROCINLINE:<{
+    5 -ROLL
+    $SubscriptionContract$_fun_requireOwner INLINECALLDICT
+    NIP
+    24905 PUSHINT
+    s5 PUSH
+    0 GTINT
+    IF:<{
+      s5 PUSH
+      10000 PUSHINT
+      LEQ
+    }>ELSE<{
+      FALSE
+    }>
+    THROWANYIFNOT
+    s3 s4 XCHG
+    s1 s3 s0 XCHG3
   }>
   $SubscriptionContract$_internal_binary_Withdraw PROCINLINE:<{
-    4 -ROLL
+    5 -ROLL
     $SubscriptionContract$_fun_requireOwner INLINECALLDICT
     5370 PUSHINT
-    s5 s2 PUSH2
+    s6 s3 PUSH2
     LEQ
     THROWANYIFNOT
-    s1 s4 XCPU
+    s2 s5 XCPU
     SUB
-    s3 s4 PUXC
+    s4 s5 PUXC
     2 PUSHINT
     $SendParameters$_constructor_to_value_mode INLINECALLDICT
     $global_send INLINECALLDICT
     DROP
-    s1 s3 s0 XCHG3
+    s3 s4 XCHG
+    s3 s0 s0 XCHG3
   }>
   $SubscriptionContract$_internal_binary_Subscribe PROCINLINE:<{
     DROP
@@ -457,47 +508,126 @@ PROGRAM{
     DROP
     s2 POP
     14782 PUSHINT
-    s2 s5 PUSH2
+    s2 s6 PUSH2
     GEQ
     THROWANYIFNOT
-    s3 s3 XCHG2
+    s4 s1 XCPU
     ADD
         NOW
-    s2 PUSH
+    s3 PUSH
     267 PUSHINT
-    s5 PUSH
+    s7 PUSH
     257 PUSHINT
     __tact_dict_get_slice_int INLINECALLDICT
     ISNULL
     IF:<{
       267 PUSHINT
-      SWAP
+      s3 POP
       604800 PUSHINT
       ADD
-      s1 s4 s0 XCHG3
+      s1 s5 XCHG
       257 PUSHINT
       __tact_dict_set_slice_int INLINECALLDICT
           B{b5ee9c7241010101001c000034000000004672656520747269616c2068617320737461727465647036e029} B>boc PUSHREF
       $SubscriptionContract$_fun_reply INLINECALLDICT
     }>ELSE<{
-      s2 PUSH
+      s3 PUSH
       267 PUSHINT
-      s5 PUSH
+      s7 PUSH
       257 PUSHINT
       __tact_dict_get_slice_int INLINECALLDICT
       __tact_not_null INLINECALLDICT
+      s0 s3 XCHG
       2592000 PUSHINT
-      s0 s2 XCHG
+      MUL
+      s7 PUSH
+      DIV
+      s3 s3 XCHG2
           MAX
-      SWAP
+      ROT
       ADD
       267 PUSHINT
-      s0 s4 s4 XCHG3
+      s0 s5 s5 XCHG3
       257 PUSHINT
       __tact_dict_set_slice_int INLINECALLDICT
           B{b5ee9c7241010101001d00003600000000537562736372697074696f6e207375636365737366756c249fce0f} B>boc PUSHREF
       $SubscriptionContract$_fun_reply INLINECALLDICT
     }>
+  }>
+  $SubscriptionContract$_internal_binary_Refund PROCINLINE:<{
+    DROP
+    __tact_context_get INLINECALLDICT
+    s2 s3 XCHG
+    3 BLKDROP
+        NOW
+    s2 PUSH
+    267 PUSHINT
+    s3 PUSH
+    257 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    18315 PUSHINT
+    OVER
+    ISNULL
+    NOT
+    THROWANYIFNOT
+    38981 PUSHINT
+    OVER
+    __tact_not_null INLINECALLDICT
+    s3 PUSH
+    GREATER
+    THROWANYIFNOT
+    DUP
+    __tact_not_null INLINECALLDICT
+    s2 PUSH
+    SUB
+    SWAP
+    __tact_not_null INLINECALLDICT
+    s2 s1 PUSH2
+    SUB
+    SUB
+    s0 s1 PUXC
+    SUB
+    s7 s(-1) PUXC
+    MUL
+    10000 PUSHINT
+    s6 PUSH
+    ADD
+    MUL
+    SWAP
+    10000 PUSHINT
+    MUL
+    DIV
+    s6 PUSH
+    0 PUSHINT
+    s0 s2 XCHG
+    SUB
+        MAX
+    62817 PUSHINT
+    s1 s6 PUSH2
+    LEQ
+    THROWANYIFNOT
+    s5 s5 XCPU
+    SUB
+    s1 s3 XCHG
+    267 PUSHINT
+    s0 s3 s4 XCPUXC
+    257 PUSHINT
+    __tact_dict_set_slice_int INLINECALLDICT
+    s4 PUSH
+    0 GTINT
+    IF:<{
+      s0 s4 XCHG
+      2 PUSHINT
+      $SendParameters$_constructor_to_value_mode INLINECALLDICT
+      $global_send INLINECALLDICT
+      DROP
+    }>ELSE<{
+      s4 POP
+      DROP
+    }>
+        B{b5ee9c7241010101001600002800000000526566756e642070726f636573736564711a35a4} B>boc PUSHREF
+    s1 s3 XCHG
+    $SubscriptionContract$_fun_reply INLINECALLDICT
   }>
   $SubscriptionContract$_internal_binary_Deploy PROCINLINE:<{
     $DeployOk$_constructor_queryId INLINECALLDICT
@@ -507,26 +637,31 @@ PROGRAM{
   %checkSubscription PROC:<{
     __tact_verify_address INLINECALLDICT
     $SubscriptionContract$_contract_load INLINECALLDICT
-    4 ROLL
+    5 ROLL
     $SubscriptionContract$_fun_checkSubscription INLINECALLDICT
-    4 1 BLKDROP2
+    5 1 BLKDROP2
   }>
-  %getExpiryTime PROC:<{
+  %expiryTime PROC:<{
     __tact_verify_address INLINECALLDICT
     $SubscriptionContract$_contract_load INLINECALLDICT
-    4 ROLL
-    $SubscriptionContract$_fun_getExpiryTime INLINECALLDICT
-    4 1 BLKDROP2
+    5 ROLL
+    $SubscriptionContract$_fun_expiryTime INLINECALLDICT
+    5 1 BLKDROP2
   }>
-  %getPrice PROC:<{
+  %price PROC:<{
     $SubscriptionContract$_contract_load INLINECALLDICT
-    $SubscriptionContract$_fun_getPrice INLINECALLDICT
-    4 1 BLKDROP2
+    $SubscriptionContract$_fun_price INLINECALLDICT
+    5 1 BLKDROP2
   }>
-  %getBalance PROC:<{
+  %balance PROC:<{
     $SubscriptionContract$_contract_load INLINECALLDICT
-    $SubscriptionContract$_fun_getBalance INLINECALLDICT
-    4 1 BLKDROP2
+    $SubscriptionContract$_fun_balance INLINECALLDICT
+    5 1 BLKDROP2
+  }>
+  %feeRate PROC:<{
+    $SubscriptionContract$_contract_load INLINECALLDICT
+    $SubscriptionContract$_fun_feeRate INLINECALLDICT
+    5 1 BLKDROP2
   }>
   lazy_deployment_completed PROC:<{
     c4 PUSH
@@ -560,6 +695,16 @@ PROGRAM{
       TRUE
     }>
     DUP
+    4057368648 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $UpdateFeeRate$_load INLINECALLDICT
+      NIP
+      $SubscriptionContract$_internal_binary_UpdateFeeRate INLINECALLDICT
+      TRUE
+    }>
+    DUP
     195467089 PUSHINT
     EQUAL
     IFJMP:<{
@@ -577,6 +722,16 @@ PROGRAM{
       $Subscribe$_load INLINECALLDICT
       NIP
       $SubscriptionContract$_internal_binary_Subscribe INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    2910599901 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $Refund$_load INLINECALLDICT
+      NIP
+      $SubscriptionContract$_internal_binary_Refund INLINECALLDICT
       TRUE
     }>
     2490013878 PUSHINT
@@ -609,7 +764,7 @@ PROGRAM{
     s0 s2 XCHG
     __tact_context_sender SETGLOB
     $SubscriptionContract$_contract_load INLINECALLDICT
-    2 4 BLKSWAP
+    2 5 BLKSWAP
     $SubscriptionContract$_contract_router_internal INLINECALLDICT
     130 THROWIFNOT
     $SubscriptionContract$_contract_store INLINECALLDICT

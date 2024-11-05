@@ -68,6 +68,18 @@ cell $DeployOk$_store_cell((int) v) inline {
 }
 
 ;;
+;; Type: UpdateFeeRate
+;; Header: 0xf1d68848
+;; TLB: update_fee_rate#f1d68848 newRate:uint32 = UpdateFeeRate
+;;
+
+(slice, ((int))) $UpdateFeeRate$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 4057368648);
+    var v'newRate = sc_0~load_uint(32);
+    return (sc_0, (v'newRate));
+}
+
+;;
 ;; Type: Withdraw
 ;; Header: 0x0ba69751
 ;; TLB: withdraw#0ba69751 amount:coins = Withdraw
@@ -91,24 +103,37 @@ cell $DeployOk$_store_cell((int) v) inline {
 }
 
 ;;
+;; Type: Refund
+;; Header: 0xad7c3add
+;; TLB: refund#ad7c3add  = Refund
+;;
+
+(slice, (tuple)) $Refund$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2910599901);
+    return (sc_0, null());
+}
+
+;;
 ;; Type: SubscriptionContract
 ;;
 
-builder $SubscriptionContract$_store(builder build_0, (slice, int, int, cell) v) inline {
-    var (v'owner, v'price, v'balance, v'subscriptions) = v;
+builder $SubscriptionContract$_store(builder build_0, (slice, int, int, int, cell) v) inline {
+    var (v'owner, v'price, v'balance, v'feeRate, v'subscriptions) = v;
     build_0 = __tact_store_address(build_0, v'owner);
     build_0 = build_0.store_coins(v'price);
     build_0 = build_0.store_coins(v'balance);
+    build_0 = build_0.store_uint(v'feeRate, 32);
     build_0 = build_0.store_dict(v'subscriptions);
     return build_0;
 }
 
-(slice, ((slice, int, int, cell))) $SubscriptionContract$_load(slice sc_0) inline {
+(slice, ((slice, int, int, int, cell))) $SubscriptionContract$_load(slice sc_0) inline {
     var v'owner = sc_0~__tact_load_address();
     var v'price = sc_0~load_coins();
     var v'balance = sc_0~load_coins();
+    var v'feeRate = sc_0~load_uint(32);
     var v'subscriptions = sc_0~load_dict();
-    return (sc_0, (v'owner, v'price, v'balance, v'subscriptions));
+    return (sc_0, (v'owner, v'price, v'balance, v'feeRate, v'subscriptions));
 }
 
 (slice, ((slice))) $SubscriptionContract$init$_load(slice sc_0) inline {
@@ -116,7 +141,7 @@ builder $SubscriptionContract$_store(builder build_0, (slice, int, int, cell) v)
     return (sc_0, (v'owner));
 }
 
-(slice, int, int, cell) $SubscriptionContract$_contract_load() impure inline_ref {
+(slice, int, int, int, cell) $SubscriptionContract$_contract_load() impure inline_ref {
     slice $sc = get_data().begin_parse();
     __tact_context_sys = $sc~load_ref();
     int $loaded = $sc~load_int(1);
@@ -131,7 +156,7 @@ builder $SubscriptionContract$_store(builder build_0, (slice, int, int, cell) v)
     }
 }
 
-() $SubscriptionContract$_contract_store((slice, int, int, cell) v) impure inline {
+() $SubscriptionContract$_contract_store((slice, int, int, int, cell) v) impure inline {
     builder b = begin_cell();
     b = b.store_ref(__tact_context_sys);
     b = b.store_int(true, 1);

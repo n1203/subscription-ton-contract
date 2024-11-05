@@ -11,76 +11,92 @@
 ;; Contract SubscriptionContract functions
 ;;
 
-(slice, int, int, cell) $SubscriptionContract$_contract_init(slice $owner) impure inline_ref {
-    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = (null(), null(), null(), null());
+(slice, int, int, int, cell) $SubscriptionContract$_contract_init(slice $owner) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)) = (null(), null(), null(), null(), null());
     $self'owner = $owner;
     $self'price = 1000000000;
     $self'balance = 0;
-    return ($self'owner, $self'price, $self'balance, $self'subscriptions);
+    $self'feeRate = 1000;
+    return ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions);
 }
 
-((slice, int, int, cell), ()) $SubscriptionContract$_fun_requireOwner((slice, int, int, cell) $self) impure inline_ref {
-    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = $self;
+((slice, int, int, int, cell), ()) $SubscriptionContract$_fun_requireOwner((slice, int, int, int, cell) $self) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)) = $self;
     var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
     throw_unless(16053, ( __tact_slice_eq_bits($self'owner, $ctx'sender) ));
-    return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), ());
 }
 
-((slice, int, int, cell), int) $SubscriptionContract$_fun_checkSubscription((slice, int, int, cell) $self, slice $user) impure inline_ref {
-    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = $self;
+((slice, int, int, int, cell), int) $SubscriptionContract$_fun_checkSubscription((slice, int, int, int, cell) $self, slice $user) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)) = $self;
     int $expiry = __tact_dict_get_slice_int($self'subscriptions, 267, $user, 257);
     if (null?($expiry)) {
         var $fresh$ret_0 = false;
-        return (($self'owner, $self'price, $self'balance, $self'subscriptions), $fresh$ret_0);
+        return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), $fresh$ret_0);
     }
     var $fresh$ret_1 = (__tact_not_null($expiry) > $global_now());
-    return (($self'owner, $self'price, $self'balance, $self'subscriptions), $fresh$ret_1);
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), $fresh$ret_1);
 }
 
-((slice, int, int, cell), int) $SubscriptionContract$_fun_getExpiryTime((slice, int, int, cell) $self, slice $user) impure inline_ref {
-    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = $self;
+((slice, int, int, int, cell), int) $SubscriptionContract$_fun_expiryTime((slice, int, int, int, cell) $self, slice $user) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)) = $self;
     int $expiry = __tact_dict_get_slice_int($self'subscriptions, 267, $user, 257);
     var $fresh$ret_2 = __tact_not_null($expiry);
-    return (($self'owner, $self'price, $self'balance, $self'subscriptions), $fresh$ret_2);
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), $fresh$ret_2);
 }
 
-((slice, int, int, cell), int) $SubscriptionContract$_fun_getPrice((slice, int, int, cell) $self) impure inline_ref {
-    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = $self;
+((slice, int, int, int, cell), int) $SubscriptionContract$_fun_price((slice, int, int, int, cell) $self) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)) = $self;
     var $fresh$ret_3 = $self'price;
-    return (($self'owner, $self'price, $self'balance, $self'subscriptions), $fresh$ret_3);
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), $fresh$ret_3);
 }
 
-((slice, int, int, cell), int) $SubscriptionContract$_fun_getBalance((slice, int, int, cell) $self) impure inline_ref {
-    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = $self;
+((slice, int, int, int, cell), int) $SubscriptionContract$_fun_balance((slice, int, int, int, cell) $self) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)) = $self;
     var $fresh$ret_4 = $self'balance;
-    return (($self'owner, $self'price, $self'balance, $self'subscriptions), $fresh$ret_4);
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), $fresh$ret_4);
+}
+
+((slice, int, int, int, cell), int) $SubscriptionContract$_fun_feeRate((slice, int, int, int, cell) $self) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)) = $self;
+    var $fresh$ret_5 = $self'feeRate;
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), $fresh$ret_5);
 }
 
 ;;
 ;; Receivers of a Contract SubscriptionContract
 ;;
 
-(((slice, int, int, cell)), ()) $SubscriptionContract$_internal_binary_UpdatePrice((slice, int, int, cell) $self, (int) $msg) impure inline {
-    var ($self'owner, $self'price, $self'balance, $self'subscriptions) = $self;
+(((slice, int, int, int, cell)), ()) $SubscriptionContract$_internal_binary_UpdatePrice((slice, int, int, int, cell) $self, (int) $msg) impure inline {
+    var ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions) = $self;
     var ($msg'newPrice) = $msg;
-    ($self'owner, $self'price, $self'balance, $self'subscriptions)~$SubscriptionContract$_fun_requireOwner();
+    ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)~$SubscriptionContract$_fun_requireOwner();
     throw_unless(50036, ($msg'newPrice > 0));
     $self'price = $msg'newPrice;
-    return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), ());
 }
 
-(((slice, int, int, cell)), ()) $SubscriptionContract$_internal_binary_Withdraw((slice, int, int, cell) $self, (int) $msg) impure inline {
-    var ($self'owner, $self'price, $self'balance, $self'subscriptions) = $self;
+(((slice, int, int, int, cell)), ()) $SubscriptionContract$_internal_binary_UpdateFeeRate((slice, int, int, int, cell) $self, (int) $msg) impure inline {
+    var ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions) = $self;
+    var ($msg'newRate) = $msg;
+    ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)~$SubscriptionContract$_fun_requireOwner();
+    throw_unless(24905, ( (($msg'newRate > 0)) ? (($msg'newRate <= 10000)) : (false) ));
+    $self'feeRate = $msg'newRate;
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), ());
+}
+
+(((slice, int, int, int, cell)), ()) $SubscriptionContract$_internal_binary_Withdraw((slice, int, int, int, cell) $self, (int) $msg) impure inline {
+    var ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions) = $self;
     var ($msg'amount) = $msg;
-    ($self'owner, $self'price, $self'balance, $self'subscriptions)~$SubscriptionContract$_fun_requireOwner();
+    ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)~$SubscriptionContract$_fun_requireOwner();
     throw_unless(5370, ($msg'amount <= $self'balance));
     $self'balance = ($self'balance - $msg'amount);
     $global_send($SendParameters$_constructor_to_value_mode($self'owner, $msg'amount, 2));
-    return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), ());
 }
 
-(((slice, int, int, cell)), ()) $SubscriptionContract$_internal_binary_Subscribe((slice, int, int, cell) $self, tuple $msg) impure inline {
-    var ($self'owner, $self'price, $self'balance, $self'subscriptions) = $self;
+(((slice, int, int, int, cell)), ()) $SubscriptionContract$_internal_binary_Subscribe((slice, int, int, int, cell) $self, tuple $msg) impure inline {
+    var ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions) = $self;
     var $msg = $msg;
     var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
     slice $sender = $ctx'sender;
@@ -89,22 +105,46 @@
     int $now = $global_now();
     if (null?(__tact_dict_get_slice_int($self'subscriptions, 267, $sender, 257))) {
         $self'subscriptions~__tact_dict_set_slice_int(267, $sender, ($now + 604800), 257);
-        ($self'owner, $self'price, $self'balance, $self'subscriptions)~$SubscriptionContract$_fun_reply(__gen_cell_comment_1853398e613b8e334cc1fb3a0da96f138ad7f4080cce052485b35c598b6616cf());
-        return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+        ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)~$SubscriptionContract$_fun_reply(__gen_cell_comment_1853398e613b8e334cc1fb3a0da96f138ad7f4080cce052485b35c598b6616cf());
+        return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), ());
     }
     int $currentExpiry = __tact_not_null(__tact_dict_get_slice_int($self'subscriptions, 267, $sender, 257));
-    int $subscriptionPeriod = 2592000;
+    int $monthInSeconds = 2592000;
+    int $subscriptionPeriod = (($ctx'value * $monthInSeconds) / $self'price);
     int $newExpiry = ($global_max($currentExpiry, $now) + $subscriptionPeriod);
     $self'subscriptions~__tact_dict_set_slice_int(267, $sender, $newExpiry, 257);
-    ($self'owner, $self'price, $self'balance, $self'subscriptions)~$SubscriptionContract$_fun_reply(__gen_cell_comment_85662185b4a59173bfcd1db683997d9cd1d239da9aa962f9f7160d7ba758c27d());
-    return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+    ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)~$SubscriptionContract$_fun_reply(__gen_cell_comment_85662185b4a59173bfcd1db683997d9cd1d239da9aa962f9f7160d7ba758c27d());
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), ());
 }
 
-(((slice, int, int, cell)), ()) $SubscriptionContract$_internal_binary_Deploy((slice, int, int, cell) $self, (int) $deploy) impure inline {
-    var ($self'owner, $self'price, $self'balance, $self'subscriptions) = $self;
+(((slice, int, int, int, cell)), ()) $SubscriptionContract$_internal_binary_Refund((slice, int, int, int, cell) $self, tuple $msg) impure inline {
+    var ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions) = $self;
+    var $msg = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    slice $sender = $ctx'sender;
+    int $now = $global_now();
+    int $expiry = __tact_dict_get_slice_int($self'subscriptions, 267, $sender, 257);
+    throw_unless(18315, (~ null?($expiry)));
+    throw_unless(38981, (__tact_not_null($expiry) > $now));
+    int $remainingTime = (__tact_not_null($expiry) - $now);
+    int $totalTime = (__tact_not_null($expiry) - ($now - $remainingTime));
+    int $usedAmount = ((($self'price * ($totalTime - $remainingTime)) * (10000 + $self'feeRate)) / ($totalTime * 10000));
+    int $finalRefundAmount = $global_max(0, ($self'price - $usedAmount));
+    throw_unless(62817, ($finalRefundAmount <= $self'balance));
+    $self'balance = ($self'balance - $finalRefundAmount);
+    $self'subscriptions~__tact_dict_set_slice_int(267, $sender, $now, 257);
+    if (($finalRefundAmount > 0)) {
+        $global_send($SendParameters$_constructor_to_value_mode($sender, $finalRefundAmount, 2));
+    }
+    ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)~$SubscriptionContract$_fun_reply(__gen_cell_comment_0f1e3cc9ff4d0c31fb80f8f5436975f8bd5fd68c27cd7df95ca80b1bd35eb9a5());
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), ());
+}
+
+(((slice, int, int, int, cell)), ()) $SubscriptionContract$_internal_binary_Deploy((slice, int, int, int, cell) $self, (int) $deploy) impure inline {
+    var ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions) = $self;
     var ($deploy'queryId) = $deploy;
-    ($self'owner, $self'price, $self'balance, $self'subscriptions)~$SubscriptionContract$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
-    return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+    ($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions)~$SubscriptionContract$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
+    return (($self'owner, $self'price, $self'balance, $self'feeRate, $self'subscriptions), ());
 }
 
 ;;
@@ -118,22 +158,28 @@ _ %checkSubscription(slice $user) method_id(121470) {
     return res;
 }
 
-_ %getExpiryTime(slice $user) method_id(94419) {
+_ %expiryTime(slice $user) method_id(107514) {
     slice $user = __tact_verify_address($user);
     var self = $SubscriptionContract$_contract_load();
-    var res = self~$SubscriptionContract$_fun_getExpiryTime($user);
+    var res = self~$SubscriptionContract$_fun_expiryTime($user);
     return res;
 }
 
-_ %getPrice() method_id(73359) {
+_ %price() method_id(120091) {
     var self = $SubscriptionContract$_contract_load();
-    var res = self~$SubscriptionContract$_fun_getPrice();
+    var res = self~$SubscriptionContract$_fun_price();
     return res;
 }
 
-_ %getBalance() method_id(106323) {
+_ %balance() method_id(104128) {
     var self = $SubscriptionContract$_contract_load();
-    var res = self~$SubscriptionContract$_fun_getBalance();
+    var res = self~$SubscriptionContract$_fun_balance();
+    return res;
+}
+
+_ %feeRate() method_id(129083) {
+    var self = $SubscriptionContract$_contract_load();
+    var res = self~$SubscriptionContract$_fun_feeRate();
     return res;
 }
 
@@ -145,7 +191,7 @@ _ lazy_deployment_completed() method_id {
 ;; Routing of a Contract SubscriptionContract
 ;;
 
-((slice, int, int, cell), int) $SubscriptionContract$_contract_router_internal((slice, int, int, cell) self, int msg_bounced, slice in_msg) impure inline_ref {
+((slice, int, int, int, cell), int) $SubscriptionContract$_contract_router_internal((slice, int, int, int, cell) self, int msg_bounced, slice in_msg) impure inline_ref {
     ;; Handle bounced messages
     if (msg_bounced) {
         return (self, true);
@@ -165,6 +211,13 @@ _ lazy_deployment_completed() method_id {
         return (self, true);
     }
     
+    ;; Receive UpdateFeeRate message
+    if (op == 4057368648) {
+        var msg = in_msg~$UpdateFeeRate$_load();
+        self~$SubscriptionContract$_internal_binary_UpdateFeeRate(msg);
+        return (self, true);
+    }
+    
     ;; Receive Withdraw message
     if (op == 195467089) {
         var msg = in_msg~$Withdraw$_load();
@@ -176,6 +229,13 @@ _ lazy_deployment_completed() method_id {
     if (op == 1550988333) {
         var msg = in_msg~$Subscribe$_load();
         self~$SubscriptionContract$_internal_binary_Subscribe(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Refund message
+    if (op == 2910599901) {
+        var msg = in_msg~$Refund$_load();
+        self~$SubscriptionContract$_internal_binary_Refund(msg);
         return (self, true);
     }
     

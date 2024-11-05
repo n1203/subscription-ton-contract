@@ -15,6 +15,7 @@ This contract has been deployed to the TON testnet at: https://testnet.tonviewer
 - 💸 Secure balance withdrawal system for revenue collection
 - ⏰ Customizable subscription periods (monthly, quarterly, yearly)
 - 🎁 Risk-free trial periods to experience premium features
+- 💰 Refund system for unused subscriptions (with fee, support adjust fee rate)
 
 ## Contributors
 

@@ -1,9 +1,9 @@
 # TACT Compilation Report
 Contract: SubscriptionContract
-BOC Size: 1155 bytes
+BOC Size: 1481 bytes
 
 # Types
-Total Types: 13
+Total Types: 15
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -45,6 +45,10 @@ Signature: `SubscriptionPeriod{period:uint32}`
 TLB: `update_price#247e576d newPrice:coins = UpdatePrice`
 Signature: `UpdatePrice{newPrice:coins}`
 
+## UpdateFeeRate
+TLB: `update_fee_rate#f1d68848 newRate:uint32 = UpdateFeeRate`
+Signature: `UpdateFeeRate{newRate:uint32}`
+
 ## Withdraw
 TLB: `withdraw#0ba69751 amount:coins = Withdraw`
 Signature: `Withdraw{amount:coins}`
@@ -53,22 +57,28 @@ Signature: `Withdraw{amount:coins}`
 TLB: `subscribe#5c72342d  = Subscribe`
 Signature: `Subscribe{}`
 
+## Refund
+TLB: `refund#ad7c3add  = Refund`
+Signature: `Refund{}`
+
 ## SubscriptionContract$Data
 TLB: `null`
 Signature: `null`
 
 # Get Methods
-Total Get Methods: 4
+Total Get Methods: 5
 
 ## checkSubscription
 Argument: user
 
-## getExpiryTime
+## expiryTime
 Argument: user
 
-## getPrice
+## price
 
-## getBalance
+## balance
+
+## feeRate
 
 # Error Codes
 2: Stack underflow
@@ -110,7 +120,11 @@ Argument: user
 5370: Balance is not enough
 14782: Payment amount is not enough
 16053: Only owner can call
+18315: No active subscription
+24905: Invalid fee rate
+38981: Subscription already expired
 50036: Price must be greater than 0
+62817: Contract balance not enough for refund
 
 # Trait Inheritance Diagram
 

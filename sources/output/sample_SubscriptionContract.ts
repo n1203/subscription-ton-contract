@@ -558,6 +558,53 @@ function dictValueParserUpdatePrice(): DictionaryValue<UpdatePrice> {
     }
 }
 
+export type UpdateFeeRate = {
+    $$type: 'UpdateFeeRate';
+    newRate: bigint;
+}
+
+export function storeUpdateFeeRate(src: UpdateFeeRate) {
+    return (builder: Builder) => {
+        let b_0 = builder;
+        b_0.storeUint(4057368648, 32);
+        b_0.storeUint(src.newRate, 32);
+    };
+}
+
+export function loadUpdateFeeRate(slice: Slice) {
+    let sc_0 = slice;
+    if (sc_0.loadUint(32) !== 4057368648) { throw Error('Invalid prefix'); }
+    let _newRate = sc_0.loadUintBig(32);
+    return { $$type: 'UpdateFeeRate' as const, newRate: _newRate };
+}
+
+function loadTupleUpdateFeeRate(source: TupleReader) {
+    let _newRate = source.readBigNumber();
+    return { $$type: 'UpdateFeeRate' as const, newRate: _newRate };
+}
+
+function loadGetterTupleUpdateFeeRate(source: TupleReader) {
+    let _newRate = source.readBigNumber();
+    return { $$type: 'UpdateFeeRate' as const, newRate: _newRate };
+}
+
+function storeTupleUpdateFeeRate(source: UpdateFeeRate) {
+    let builder = new TupleBuilder();
+    builder.writeNumber(source.newRate);
+    return builder.build();
+}
+
+function dictValueParserUpdateFeeRate(): DictionaryValue<UpdateFeeRate> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeUpdateFeeRate(src)).endCell());
+        },
+        parse: (src) => {
+            return loadUpdateFeeRate(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type Withdraw = {
     $$type: 'Withdraw';
     amount: bigint;
@@ -646,11 +693,53 @@ function dictValueParserSubscribe(): DictionaryValue<Subscribe> {
     }
 }
 
+export type Refund = {
+    $$type: 'Refund';
+}
+
+export function storeRefund(src: Refund) {
+    return (builder: Builder) => {
+        let b_0 = builder;
+        b_0.storeUint(2910599901, 32);
+    };
+}
+
+export function loadRefund(slice: Slice) {
+    let sc_0 = slice;
+    if (sc_0.loadUint(32) !== 2910599901) { throw Error('Invalid prefix'); }
+    return { $$type: 'Refund' as const };
+}
+
+function loadTupleRefund(source: TupleReader) {
+    return { $$type: 'Refund' as const };
+}
+
+function loadGetterTupleRefund(source: TupleReader) {
+    return { $$type: 'Refund' as const };
+}
+
+function storeTupleRefund(source: Refund) {
+    let builder = new TupleBuilder();
+    return builder.build();
+}
+
+function dictValueParserRefund(): DictionaryValue<Refund> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeRefund(src)).endCell());
+        },
+        parse: (src) => {
+            return loadRefund(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type SubscriptionContract$Data = {
     $$type: 'SubscriptionContract$Data';
     owner: Address;
     price: bigint;
     balance: bigint;
+    feeRate: bigint;
     subscriptions: Dictionary<Address, bigint>;
 }
 
@@ -660,6 +749,7 @@ export function storeSubscriptionContract$Data(src: SubscriptionContract$Data) {
         b_0.storeAddress(src.owner);
         b_0.storeCoins(src.price);
         b_0.storeCoins(src.balance);
+        b_0.storeUint(src.feeRate, 32);
         b_0.storeDict(src.subscriptions, Dictionary.Keys.Address(), Dictionary.Values.BigInt(257));
     };
 }
@@ -669,24 +759,27 @@ export function loadSubscriptionContract$Data(slice: Slice) {
     let _owner = sc_0.loadAddress();
     let _price = sc_0.loadCoins();
     let _balance = sc_0.loadCoins();
+    let _feeRate = sc_0.loadUintBig(32);
     let _subscriptions = Dictionary.load(Dictionary.Keys.Address(), Dictionary.Values.BigInt(257), sc_0);
-    return { $$type: 'SubscriptionContract$Data' as const, owner: _owner, price: _price, balance: _balance, subscriptions: _subscriptions };
+    return { $$type: 'SubscriptionContract$Data' as const, owner: _owner, price: _price, balance: _balance, feeRate: _feeRate, subscriptions: _subscriptions };
 }
 
 function loadTupleSubscriptionContract$Data(source: TupleReader) {
     let _owner = source.readAddress();
     let _price = source.readBigNumber();
     let _balance = source.readBigNumber();
+    let _feeRate = source.readBigNumber();
     let _subscriptions = Dictionary.loadDirect(Dictionary.Keys.Address(), Dictionary.Values.BigInt(257), source.readCellOpt());
-    return { $$type: 'SubscriptionContract$Data' as const, owner: _owner, price: _price, balance: _balance, subscriptions: _subscriptions };
+    return { $$type: 'SubscriptionContract$Data' as const, owner: _owner, price: _price, balance: _balance, feeRate: _feeRate, subscriptions: _subscriptions };
 }
 
 function loadGetterTupleSubscriptionContract$Data(source: TupleReader) {
     let _owner = source.readAddress();
     let _price = source.readBigNumber();
     let _balance = source.readBigNumber();
+    let _feeRate = source.readBigNumber();
     let _subscriptions = Dictionary.loadDirect(Dictionary.Keys.Address(), Dictionary.Values.BigInt(257), source.readCellOpt());
-    return { $$type: 'SubscriptionContract$Data' as const, owner: _owner, price: _price, balance: _balance, subscriptions: _subscriptions };
+    return { $$type: 'SubscriptionContract$Data' as const, owner: _owner, price: _price, balance: _balance, feeRate: _feeRate, subscriptions: _subscriptions };
 }
 
 function storeTupleSubscriptionContract$Data(source: SubscriptionContract$Data) {
@@ -694,6 +787,7 @@ function storeTupleSubscriptionContract$Data(source: SubscriptionContract$Data) 
     builder.writeAddress(source.owner);
     builder.writeNumber(source.price);
     builder.writeNumber(source.balance);
+    builder.writeNumber(source.feeRate);
     builder.writeCell(source.subscriptions.size > 0 ? beginCell().storeDictDirect(source.subscriptions, Dictionary.Keys.Address(), Dictionary.Values.BigInt(257)).endCell() : null);
     return builder.build();
 }
@@ -722,8 +816,8 @@ function initSubscriptionContract_init_args(src: SubscriptionContract_init_args)
 }
 
 async function SubscriptionContract_init(owner: Address) {
-    const __code = Cell.fromBase64('te6ccgECHAEABHcAART/APSkE/S88sgLAQIBYgIDAubQAdDTAwFxsKMB+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiFRQUwNvBPhhAvhi2zxVE9s88uCCyPhDAcx/AcoAVTBQQyDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjPFgH6Alj6AvQAye1UGQQCASAODwT2AZIwf+BwIddJwh+VMCDXCx/eIIIQJH5XbbqOozDTHwGCECR+V2268uCB+gABMVUw2zwyggDDdCTCAPL0QwB/4CCCEAuml1G6jzAw0x8BghALppdRuvLggfoAATFVMNs8gRT6U1K78vRRFKFSNXJ/VSBtbW3bPDBBMH/gBQUMBgAi+EFvJBAjXwMkgT61AscF8vQCnCCCEFxyNC26jpAw0x8BghBccjQtuvLggW0x4IIQlGqYtrqOp9MfAYIQlGqYtrry4IHTPwExyAGCEK/5D1dYyx/LP8n4QgFwbds8f+AwcAcLA/Iw+EFvJDAygTm+UyW+8vRQM6D4IyKBAQslgQEBQTP0Cm+hlAHXADCSW23ibo9IIoEBCyWBAQFBM/QKb6GUAdcAMJJbbeIgbvLQgIIIJ40AArYJAaCBAQtARIEBASFulVtZ9FkwmMgBzwBBM/RB4oj4QgF/bds84w1/CAsJADYAAAAAU3Vic2NyaXB0aW9uIHN1Y2Nlc3NmdWwCUoEBCwGCCAk6gKBBQIEBASFulVtZ9FkwmMgBzwBBM/RB4oj4QgF/bds8CgsANAAAAABGcmVlIHRyaWFsIGhhcyBzdGFydGVkATxtbSJus5lbIG7y0IBvIgGRMuIQJHADBIBCUCPbPDAMAcrIcQHKAVAHAcoAcAHKAlAFINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiM8WUAP6AnABymgjbrORf5MkbrPilzMzAXABygDjDSFus5x/AcoAASBu8tCAAcyVMXABygDiyQH7CA0AmH8BygDIcAHKAHABygAkbrOdfwHKAAQgbvLQgFAEzJY0A3ABygDiJG6znX8BygAEIG7y0IBQBMyWNANwAcoA4nABygACfwHKAALJWMwCASAQEQIBIBQVAhG56P2zzbPGxBgZEgJNuw0yDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjbPFUD2zxsQYGRMAAiIAOIEBCyICgQEBQTP0Cm+hlAHXADCSW23iIG7y0IACEbn1PbPNs8bEGBkWAgFIFxgAAiEAEbCvu1E0NIAAYAJNsp+INdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiNs8VQPbPGxBgGRoByu1E0NQB+GPSAAGOKvpAASDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IgB+gD6APQEVTBsFOD4KNcLCoMJuvLgifpAASDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IgB0ds8GwBKgQELIgKBAQFBM/QKb6GUAdcAMJJbbeIgbpIwcOAgbvLQgPgjvAASbYIQO5rKAHBY');
-    const __system = Cell.fromBase64('te6cckECHgEABIEAAQHAAQEFoN9VAgEU/wD0pBP0vPLICwMCAWIEDwLm0AHQ0wMBcbCjAfpAASDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IhUUFMDbwT4YQL4Yts8VRPbPPLggsj4QwHMfwHKAFUwUEMg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIzxYB+gJY+gL0AMntVBsFBPYBkjB/4HAh10nCH5UwINcLH94gghAkfldtuo6jMNMfAYIQJH5Xbbry4IH6AAExVTDbPDKCAMN0JMIA8vRDAH/gIIIQC6aXUbqPMDDTHwGCEAuml1G68uCB+gABMVUw2zyBFPpTUrvy9FEUoVI1cn9VIG1tbds8MEEwf+AGBg0HACL4QW8kECNfAySBPrUCxwXy9AKcIIIQXHI0LbqOkDDTHwGCEFxyNC268uCBbTHgghCUapi2uo6n0x8BghCUapi2uvLggdM/ATHIAYIQr/kPV1jLH8s/yfhCAXBt2zx/4DBwCAwD8jD4QW8kMDKBOb5TJb7y9FAzoPgjIoEBCyWBAQFBM/QKb6GUAdcAMJJbbeJuj0gigQELJYEBAUEz9ApvoZQB1wAwkltt4iBu8tCAgggnjQACtgkBoIEBC0BEgQEBIW6VW1n0WTCYyAHPAEEz9EHiiPhCAX9t2zzjDX8JDAoANgAAAABTdWJzY3JpcHRpb24gc3VjY2Vzc2Z1bAJSgQELAYIICTqAoEFAgQEBIW6VW1n0WTCYyAHPAEEz9EHiiPhCAX9t2zwLDAA0AAAAAEZyZWUgdHJpYWwgaGFzIHN0YXJ0ZWQBPG1tIm6zmVsgbvLQgG8iAZEy4hAkcAMEgEJQI9s8MA0ByshxAcoBUAcBygBwAcoCUAUg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIzxZQA/oCcAHKaCNus5F/kyRus+KXMzMBcAHKAOMNIW6znH8BygABIG7y0IABzJUxcAHKAOLJAfsIDgCYfwHKAMhwAcoAcAHKACRus51/AcoABCBu8tCAUATMljQDcAHKAOIkbrOdfwHKAAQgbvLQgFAEzJY0A3ABygDicAHKAAJ/AcoAAslYzAIBIBAVAgEgERMCEbno/bPNs8bEGBsSAAIiAk27DTINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiNs8VQPbPGxBgbFAA4gQELIgKBAQFBM/QKb6GUAdcAMJJbbeIgbvLQgAIBIBYYAhG59T2zzbPGxBgbFwACIQIBSBkaABGwr7tRNDSAAGACTbKfiDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjbPFUD2zxsQYBsdAcrtRNDUAfhj0gABjir6QAEg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIAfoA+gD0BFUwbBTg+CjXCwqDCbry4In6QAEg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIAdHbPBwAEm2CEDuaygBwWABKgQELIgKBAQFBM/QKb6GUAdcAMJJbbeIgbpIwcOAgbvLQgPgjvP4jGtQ=');
+    const __code = Cell.fromBase64('te6ccgECIwEABb0AART/APSkE/S88sgLAQIBYgIDAuzQAdDTAwFxsKMB+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiFRQUwNvBPhhAvhi2zxVFNs88uCCyPhDAcx/AcoAVUBQVCDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjPFlj6AgH6AhLLH/QAye1UIAQCAVgSEwP0AZIwf+BwIddJwh+VMCDXCx/eIIIQJH5XbbqOpDDTHwGCECR+V2268uCB+gABMVVA2zwzggDDdCXCAPL0EDRYf+AgghDx1ohIuo6tMNMfAYIQ8daISLry4IHTHwExVUDbPDGBYUklwgCVJYEnELuRcOLy9BA0QTB/4CAGBgUEnIIQC6aXUbqPMjDTHwGCEAuml1G68uCB+gABMVVA2zyBFPpTY7vy9FEloVJGcn9VIG1tbds8MBA0QwB/4CCCEFxyNC264wIgghCtfDrdugYQBwgAIvhBbyQQI18DJYE+tQLHBfL0A9Iw0x8BghBccjQtuvLggW0xMPhBbyQwMoE5vlMmvvL0UUGg+CMjgQELJ4EBAUEz9ApvoZQB1wAwkltt4m6PKIEBCzOCCAk6gKAVgQEBIW6VW1n0WTCYyAHPAEEz9EHiiPhCAX9t2zzjDn8JDwoCko6TMNMfAYIQrXw63bry4IFtMds8f+CCEJRqmLa6jqfTHwGCEJRqmLa68uCB0z8BMcgBghCv+Q9XWMsfyz/J+EIBcG3bPH/gMHAMDwA0AAAAAEZyZWUgdHJpYWwgaGFzIHN0YXJ0ZWQCnCOBAQsngQEBQTP0Cm+hlAHXADCSW23iIG7y0IADgggnjQCoJ6kEUDO2CViggQELQFWBAQEhbpVbWfRZMJjIAc8AQTP0QeKI+EIBf23bPAsPADYAAAAAU3Vic2NyaXB0aW9uIHN1Y2Nlc3NmdWwB8jD4QW8kECNfA/gjIoEBCyOBAQFBM/QKb6GUAdcAMJJbbeKBR4shbrPy9IIAmEUhIG7y0IAjvPL0ICBu8tCAIqEBIG7y0IBTIaGhUgKhUnCogScQJqCoAYEnEKipBCZwAqG2CYIA9WFTFrvy9FFVoROBAQtUIDWBAQENA14hbpVbWfRZMJjIAc8AQTP0QeIkwgCOiwRyf1UgbW1t2zwwkjQw4ogT+EIBf23bPBAODwAoAAAAAFJlZnVuZCBwcm9jZXNzZWQBPG1tIm6zmVsgbvLQgG8iAZEy4hAkcAMEgEJQI9s8MBAByshxAcoBUAcBygBwAcoCUAUg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIzxZQA/oCcAHKaCNus5F/kyRus+KXMzMBcAHKAOMNIW6znH8BygABIG7y0IABzJUxcAHKAOLJAfsIEQCYfwHKAMhwAcoAcAHKACRus51/AcoABCBu8tCAUATMljQDcAHKAOIkbrOdfwHKAAQgbvLQgFAEzJY0A3ABygDicAHKAAJ/AcoAAslYzAIBIBQVAgEgGBkCEbbYG2ebZ42KMCAWAk20f0Qa6TAgIXdeXBEEGuFhRBAgn/deWhEwYTdeXBEbZ4qgm2eNijAgFwACIgA4gQELIgKBAQFBM/QKb6GUAdcAMJJbbeIgbvLQgAIBIBobAhG3B3tnm2eNijAgIQARsK+7UTQ0gABgAgEgHB0CEa6N7Z5tnjYowCAeAk2tPxBrpMCAhd15cEQQa4WFEECCf915aETBhN15cERtniqCbZ42KMAgHwACIwBKgQELIgKBAQFBM/QKb6GUAdcAMJJbbeIgbpIwcOAgbvLQgPgjvAHO7UTQ1AH4Y9IAAY4s+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiAH6APoA0x/0BFVAbBXg+CjXCwqDCbry4In6QAEg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIAdHbPCIAAiEAGm2CEDuaygBwWIED6AE=');
+    const __system = Cell.fromBase64('te6cckECJQEABccAAQHAAQEFoN9VAgEU/wD0pBP0vPLICwMCAWIEEwLs0AHQ0wMBcbCjAfpAASDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IhUUFMDbwT4YQL4Yts8VRTbPPLggsj4QwHMfwHKAFVAUFQg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIzxZY+gIB+gISyx/0AMntVCIFA/QBkjB/4HAh10nCH5UwINcLH94gghAkfldtuo6kMNMfAYIQJH5Xbbry4IH6AAExVUDbPDOCAMN0JcIA8vQQNFh/4CCCEPHWiEi6jq0w0x8BghDx1ohIuvLggdMfATFVQNs8MYFhSSXCAJUlgScQu5Fw4vL0EDRBMH/gIAcHBgScghALppdRuo8yMNMfAYIQC6aXUbry4IH6AAExVUDbPIEU+lNju/L0USWhUkZyf1UgbW1t2zwwEDRDAH/gIIIQXHI0LbrjAiCCEK18Ot26BxEIDAAi+EFvJBAjXwMlgT61AscF8vQD0jDTHwGCEFxyNC268uCBbTEw+EFvJDAygTm+Uya+8vRRQaD4IyOBAQsngQEBQTP0Cm+hlAHXADCSW23ibo8ogQELM4IICTqAoBWBAQEhbpVbWfRZMJjIAc8AQTP0QeKI+EIBf23bPOMOfwkQCgA0AAAAAEZyZWUgdHJpYWwgaGFzIHN0YXJ0ZWQCnCOBAQsngQEBQTP0Cm+hlAHXADCSW23iIG7y0IADgggnjQCoJ6kEUDO2CViggQELQFWBAQEhbpVbWfRZMJjIAc8AQTP0QeKI+EIBf23bPAsQADYAAAAAU3Vic2NyaXB0aW9uIHN1Y2Nlc3NmdWwCko6TMNMfAYIQrXw63bry4IFtMds8f+CCEJRqmLa6jqfTHwGCEJRqmLa68uCB0z8BMcgBghCv+Q9XWMsfyz/J+EIBcG3bPH/gMHANEAHyMPhBbyQQI18D+CMigQELI4EBAUEz9ApvoZQB1wAwkltt4oFHiyFus/L0ggCYRSEgbvLQgCO88vQgIG7y0IAioQEgbvLQgFMhoaFSAqFScKiBJxAmoKgBgScQqKkEJnACobYJggD1YVMWu/L0UVWhE4EBC1QgNYEBAQ4DXiFulVtZ9FkwmMgBzwBBM/RB4iTCAI6LBHJ/VSBtbW3bPDCSNDDiiBP4QgF/bds8EQ8QACgAAAAAUmVmdW5kIHByb2Nlc3NlZAE8bW0ibrOZWyBu8tCAbyIBkTLiECRwAwSAQlAj2zwwEQHKyHEBygFQBwHKAHABygJQBSDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjPFlAD+gJwAcpoI26zkX+TJG6z4pczMwFwAcoA4w0hbrOcfwHKAAEgbvLQgAHMlTFwAcoA4skB+wgSAJh/AcoAyHABygBwAcoAJG6znX8BygAEIG7y0IBQBMyWNANwAcoA4iRus51/AcoABCBu8tCAUATMljQDcAHKAOJwAcoAAn8BygACyVjMAgFYFBkCASAVFwIRttgbZ5tnjYowIhYAAiICTbR/RBrpMCAhd15cEQQa4WFEECCf915aETBhN15cERtniqCbZ42KMCIYADiBAQsiAoEBAUEz9ApvoZQB1wAwkltt4iBu8tCAAgEgGiECASAbHAARsK+7UTQ0gABgAgEgHR8CEa6N7Z5tnjYowCIeAAIjAk2tPxBrpMCAhd15cEQQa4WFEECCf915aETBhN15cERtniqCbZ42KMAiIABKgQELIgKBAQFBM/QKb6GUAdcAMJJbbeIgbpIwcOAgbvLQgPgjvAIRtwd7Z5tnjYowIiQBzu1E0NQB+GPSAAGOLPpAASDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IgB+gD6ANMf9ARVQGwV4Pgo1wsKgwm68uCJ+kABINdJgQELuvLgiCDXCwoggQT/uvLQiYMJuvLgiAHR2zwjABptghA7msoAcFiBA+gBAAIhafTxtg==');
     let builder = beginCell();
     builder.storeRef(__system);
     builder.storeUint(0, 1);
@@ -772,7 +866,11 @@ const SubscriptionContract_errors: { [key: number]: { message: string } } = {
     5370: { message: `Balance is not enough` },
     14782: { message: `Payment amount is not enough` },
     16053: { message: `Only owner can call` },
+    18315: { message: `No active subscription` },
+    24905: { message: `Invalid fee rate` },
+    38981: { message: `Subscription already expired` },
     50036: { message: `Price must be greater than 0` },
+    62817: { message: `Contract balance not enough for refund` },
 }
 
 const SubscriptionContract_types: ABIType[] = [
@@ -786,29 +884,35 @@ const SubscriptionContract_types: ABIType[] = [
     {"name":"FactoryDeploy","header":1829761339,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"cashback","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"SubscriptionPeriod","header":2005346073,"fields":[{"name":"period","type":{"kind":"simple","type":"uint","optional":false,"format":32}}]},
     {"name":"UpdatePrice","header":612259693,"fields":[{"name":"newPrice","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
+    {"name":"UpdateFeeRate","header":4057368648,"fields":[{"name":"newRate","type":{"kind":"simple","type":"uint","optional":false,"format":32}}]},
     {"name":"Withdraw","header":195467089,"fields":[{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
     {"name":"Subscribe","header":1550988333,"fields":[]},
-    {"name":"SubscriptionContract$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"price","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"balance","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"subscriptions","type":{"kind":"dict","key":"address","value":"int"}}]},
+    {"name":"Refund","header":2910599901,"fields":[]},
+    {"name":"SubscriptionContract$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"price","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"balance","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"feeRate","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"subscriptions","type":{"kind":"dict","key":"address","value":"int"}}]},
 ]
 
 const SubscriptionContract_getters: ABIGetter[] = [
     {"name":"checkSubscription","arguments":[{"name":"user","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"bool","optional":false}},
-    {"name":"getExpiryTime","arguments":[{"name":"user","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
-    {"name":"getPrice","arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
-    {"name":"getBalance","arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"expiryTime","arguments":[{"name":"user","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"price","arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"balance","arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"feeRate","arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
 ]
 
 export const SubscriptionContract_getterMapping: { [key: string]: string } = {
     'checkSubscription': 'getCheckSubscription',
-    'getExpiryTime': 'getGetExpiryTime',
-    'getPrice': 'getGetPrice',
-    'getBalance': 'getGetBalance',
+    'expiryTime': 'getExpiryTime',
+    'price': 'getPrice',
+    'balance': 'getBalance',
+    'feeRate': 'getFeeRate',
 }
 
 const SubscriptionContract_receivers: ABIReceiver[] = [
     {"receiver":"internal","message":{"kind":"typed","type":"UpdatePrice"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"UpdateFeeRate"}},
     {"receiver":"internal","message":{"kind":"typed","type":"Withdraw"}},
     {"receiver":"internal","message":{"kind":"typed","type":"Subscribe"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"Refund"}},
     {"receiver":"internal","message":{"kind":"typed","type":"Deploy"}},
 ]
 
@@ -842,17 +946,23 @@ export class SubscriptionContract implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: UpdatePrice | Withdraw | Subscribe | Deploy) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: UpdatePrice | UpdateFeeRate | Withdraw | Subscribe | Refund | Deploy) {
         
         let body: Cell | null = null;
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'UpdatePrice') {
             body = beginCell().store(storeUpdatePrice(message)).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'UpdateFeeRate') {
+            body = beginCell().store(storeUpdateFeeRate(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Withdraw') {
             body = beginCell().store(storeWithdraw(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Subscribe') {
             body = beginCell().store(storeSubscribe(message)).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Refund') {
+            body = beginCell().store(storeRefund(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deploy') {
             body = beginCell().store(storeDeploy(message)).endCell();
@@ -871,24 +981,31 @@ export class SubscriptionContract implements Contract {
         return result;
     }
     
-    async getGetExpiryTime(provider: ContractProvider, user: Address) {
+    async getExpiryTime(provider: ContractProvider, user: Address) {
         let builder = new TupleBuilder();
         builder.writeAddress(user);
-        let source = (await provider.get('getExpiryTime', builder.build())).stack;
+        let source = (await provider.get('expiryTime', builder.build())).stack;
         let result = source.readBigNumber();
         return result;
     }
     
-    async getGetPrice(provider: ContractProvider) {
+    async getPrice(provider: ContractProvider) {
         let builder = new TupleBuilder();
-        let source = (await provider.get('getPrice', builder.build())).stack;
+        let source = (await provider.get('price', builder.build())).stack;
         let result = source.readBigNumber();
         return result;
     }
     
-    async getGetBalance(provider: ContractProvider) {
+    async getBalance(provider: ContractProvider) {
         let builder = new TupleBuilder();
-        let source = (await provider.get('getBalance', builder.build())).stack;
+        let source = (await provider.get('balance', builder.build())).stack;
+        let result = source.readBigNumber();
+        return result;
+    }
+    
+    async getFeeRate(provider: ContractProvider) {
+        let builder = new TupleBuilder();
+        let source = (await provider.get('feeRate', builder.build())).stack;
         let result = source.readBigNumber();
         return result;
     }

@@ -45,17 +45,23 @@ cell $DeployOk$_store_cell((int) v) inline;
 ;; $UpdatePrice$_load
 (slice, ((int))) $UpdatePrice$_load(slice sc_0) inline;
 
+;; $UpdateFeeRate$_load
+(slice, ((int))) $UpdateFeeRate$_load(slice sc_0) inline;
+
 ;; $Withdraw$_load
 (slice, ((int))) $Withdraw$_load(slice sc_0) inline;
 
 ;; $Subscribe$_load
 (slice, (tuple)) $Subscribe$_load(slice sc_0) inline;
 
+;; $Refund$_load
+(slice, (tuple)) $Refund$_load(slice sc_0) inline;
+
 ;; $SubscriptionContract$_store
-builder $SubscriptionContract$_store(builder build_0, (slice, int, int, cell) v) inline;
+builder $SubscriptionContract$_store(builder build_0, (slice, int, int, int, cell) v) inline;
 
 ;; $SubscriptionContract$_load
-(slice, ((slice, int, int, cell))) $SubscriptionContract$_load(slice sc_0) inline;
+(slice, ((slice, int, int, int, cell))) $SubscriptionContract$_load(slice sc_0) inline;
 
 ;; $StateInit$_not_null
 ((cell, cell)) $StateInit$_not_null(tuple v) inline;
@@ -64,43 +70,46 @@ builder $SubscriptionContract$_store(builder build_0, (slice, int, int, cell) v)
 (slice, ((slice))) $SubscriptionContract$init$_load(slice sc_0) inline;
 
 ;; $SubscriptionContract$_contract_init
-(slice, int, int, cell) $SubscriptionContract$_contract_init(slice $owner) impure inline_ref;
+(slice, int, int, int, cell) $SubscriptionContract$_contract_init(slice $owner) impure inline_ref;
 
 ;; $SubscriptionContract$_contract_load
-(slice, int, int, cell) $SubscriptionContract$_contract_load() impure inline_ref;
+(slice, int, int, int, cell) $SubscriptionContract$_contract_load() impure inline_ref;
 
 ;; $SubscriptionContract$_contract_store
-() $SubscriptionContract$_contract_store((slice, int, int, cell) v) impure inline;
+() $SubscriptionContract$_contract_store((slice, int, int, int, cell) v) impure inline;
 
 ;; $global_send
 int $global_send((int, slice, int, int, cell, cell, cell) $params) impure inline_ref;
 
 ;; $SubscriptionContract$_fun_requireOwner
-((slice, int, int, cell), ()) $SubscriptionContract$_fun_requireOwner((slice, int, int, cell) $self) impure inline_ref;
+((slice, int, int, int, cell), ()) $SubscriptionContract$_fun_requireOwner((slice, int, int, int, cell) $self) impure inline_ref;
 
 ;; $SubscriptionContract$_fun_checkSubscription
-((slice, int, int, cell), int) $SubscriptionContract$_fun_checkSubscription((slice, int, int, cell) $self, slice $user) impure inline_ref;
+((slice, int, int, int, cell), int) $SubscriptionContract$_fun_checkSubscription((slice, int, int, int, cell) $self, slice $user) impure inline_ref;
 
-;; $SubscriptionContract$_fun_getExpiryTime
-((slice, int, int, cell), int) $SubscriptionContract$_fun_getExpiryTime((slice, int, int, cell) $self, slice $user) impure inline_ref;
+;; $SubscriptionContract$_fun_expiryTime
+((slice, int, int, int, cell), int) $SubscriptionContract$_fun_expiryTime((slice, int, int, int, cell) $self, slice $user) impure inline_ref;
 
-;; $SubscriptionContract$_fun_getPrice
-((slice, int, int, cell), int) $SubscriptionContract$_fun_getPrice((slice, int, int, cell) $self) impure inline_ref;
+;; $SubscriptionContract$_fun_price
+((slice, int, int, int, cell), int) $SubscriptionContract$_fun_price((slice, int, int, int, cell) $self) impure inline_ref;
 
-;; $SubscriptionContract$_fun_getBalance
-((slice, int, int, cell), int) $SubscriptionContract$_fun_getBalance((slice, int, int, cell) $self) impure inline_ref;
+;; $SubscriptionContract$_fun_balance
+((slice, int, int, int, cell), int) $SubscriptionContract$_fun_balance((slice, int, int, int, cell) $self) impure inline_ref;
+
+;; $SubscriptionContract$_fun_feeRate
+((slice, int, int, int, cell), int) $SubscriptionContract$_fun_feeRate((slice, int, int, int, cell) $self) impure inline_ref;
 
 ;; $SendParameters$_constructor_bounce_to_value_mode_body_code_data
 ((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_bounce_to_value_mode_body_code_data(int $bounce, slice $to, int $value, int $mode, cell $body, cell $code, cell $data) inline;
 
 ;; $SubscriptionContract$_fun_forward
-((slice, int, int, cell), ()) $SubscriptionContract$_fun_forward((slice, int, int, cell) $self, slice $to, cell $body, int $bounce, tuple $init) impure inline_ref;
+((slice, int, int, int, cell), ()) $SubscriptionContract$_fun_forward((slice, int, int, int, cell) $self, slice $to, cell $body, int $bounce, tuple $init) impure inline_ref;
 
 ;; $SubscriptionContract$_fun_reply
-((slice, int, int, cell), ()) $SubscriptionContract$_fun_reply((slice, int, int, cell) $self, cell $body) impure inline;
+((slice, int, int, int, cell), ()) $SubscriptionContract$_fun_reply((slice, int, int, int, cell) $self, cell $body) impure inline;
 
 ;; $SubscriptionContract$_fun_notify
-((slice, int, int, cell), ()) $SubscriptionContract$_fun_notify((slice, int, int, cell) $self, cell $body) impure inline;
+((slice, int, int, int, cell), ()) $SubscriptionContract$_fun_notify((slice, int, int, int, cell) $self, cell $body) impure inline;
 
 ;; $SendParameters$_constructor_to_value_mode
 ((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline;
