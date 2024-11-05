@@ -1,0 +1,213 @@
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "sample_SubscriptionContract.headers.fc";
+#include "sample_SubscriptionContract.stdlib.fc";
+#include "sample_SubscriptionContract.constants.fc";
+#include "sample_SubscriptionContract.storage.fc";
+
+;;
+;; Contract SubscriptionContract functions
+;;
+
+(slice, int, int, cell) $SubscriptionContract$_contract_init(slice $owner) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = (null(), null(), null(), null());
+    $self'owner = $owner;
+    $self'price = 1000000000;
+    $self'balance = 0;
+    return ($self'owner, $self'price, $self'balance, $self'subscriptions);
+}
+
+((slice, int, int, cell), ()) $SubscriptionContract$_fun_requireOwner((slice, int, int, cell) $self) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = $self;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    throw_unless(16053, ( __tact_slice_eq_bits($self'owner, $ctx'sender) ));
+    return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+}
+
+((slice, int, int, cell), int) $SubscriptionContract$_fun_checkSubscription((slice, int, int, cell) $self, slice $user) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = $self;
+    int $expiry = __tact_dict_get_slice_int($self'subscriptions, 267, $user, 257);
+    if (null?($expiry)) {
+        var $fresh$ret_0 = false;
+        return (($self'owner, $self'price, $self'balance, $self'subscriptions), $fresh$ret_0);
+    }
+    var $fresh$ret_1 = (__tact_not_null($expiry) > $global_now());
+    return (($self'owner, $self'price, $self'balance, $self'subscriptions), $fresh$ret_1);
+}
+
+((slice, int, int, cell), int) $SubscriptionContract$_fun_getExpiryTime((slice, int, int, cell) $self, slice $user) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = $self;
+    int $expiry = __tact_dict_get_slice_int($self'subscriptions, 267, $user, 257);
+    var $fresh$ret_2 = __tact_not_null($expiry);
+    return (($self'owner, $self'price, $self'balance, $self'subscriptions), $fresh$ret_2);
+}
+
+((slice, int, int, cell), int) $SubscriptionContract$_fun_getPrice((slice, int, int, cell) $self) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = $self;
+    var $fresh$ret_3 = $self'price;
+    return (($self'owner, $self'price, $self'balance, $self'subscriptions), $fresh$ret_3);
+}
+
+((slice, int, int, cell), int) $SubscriptionContract$_fun_getBalance((slice, int, int, cell) $self) impure inline_ref {
+    var (($self'owner, $self'price, $self'balance, $self'subscriptions)) = $self;
+    var $fresh$ret_4 = $self'balance;
+    return (($self'owner, $self'price, $self'balance, $self'subscriptions), $fresh$ret_4);
+}
+
+;;
+;; Receivers of a Contract SubscriptionContract
+;;
+
+(((slice, int, int, cell)), ()) $SubscriptionContract$_internal_binary_UpdatePrice((slice, int, int, cell) $self, (int) $msg) impure inline {
+    var ($self'owner, $self'price, $self'balance, $self'subscriptions) = $self;
+    var ($msg'newPrice) = $msg;
+    ($self'owner, $self'price, $self'balance, $self'subscriptions)~$SubscriptionContract$_fun_requireOwner();
+    throw_unless(50036, ($msg'newPrice > 0));
+    $self'price = $msg'newPrice;
+    return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+}
+
+(((slice, int, int, cell)), ()) $SubscriptionContract$_internal_binary_Withdraw((slice, int, int, cell) $self, (int) $msg) impure inline {
+    var ($self'owner, $self'price, $self'balance, $self'subscriptions) = $self;
+    var ($msg'amount) = $msg;
+    ($self'owner, $self'price, $self'balance, $self'subscriptions)~$SubscriptionContract$_fun_requireOwner();
+    throw_unless(5370, ($msg'amount <= $self'balance));
+    $self'balance = ($self'balance - $msg'amount);
+    $global_send($SendParameters$_constructor_to_value_mode($self'owner, $msg'amount, 2));
+    return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+}
+
+(((slice, int, int, cell)), ()) $SubscriptionContract$_internal_binary_Subscribe((slice, int, int, cell) $self, tuple $msg) impure inline {
+    var ($self'owner, $self'price, $self'balance, $self'subscriptions) = $self;
+    var $msg = $msg;
+    var ($ctx'bounced, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+    slice $sender = $ctx'sender;
+    throw_unless(14782, ($ctx'value >= $self'price));
+    $self'balance = ($self'balance + $ctx'value);
+    int $now = $global_now();
+    if (null?(__tact_dict_get_slice_int($self'subscriptions, 267, $sender, 257))) {
+        $self'subscriptions~__tact_dict_set_slice_int(267, $sender, ($now + 604800), 257);
+        ($self'owner, $self'price, $self'balance, $self'subscriptions)~$SubscriptionContract$_fun_reply(__gen_cell_comment_1853398e613b8e334cc1fb3a0da96f138ad7f4080cce052485b35c598b6616cf());
+        return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+    }
+    int $currentExpiry = __tact_not_null(__tact_dict_get_slice_int($self'subscriptions, 267, $sender, 257));
+    int $subscriptionPeriod = 2592000;
+    int $newExpiry = ($global_max($currentExpiry, $now) + $subscriptionPeriod);
+    $self'subscriptions~__tact_dict_set_slice_int(267, $sender, $newExpiry, 257);
+    ($self'owner, $self'price, $self'balance, $self'subscriptions)~$SubscriptionContract$_fun_reply(__gen_cell_comment_85662185b4a59173bfcd1db683997d9cd1d239da9aa962f9f7160d7ba758c27d());
+    return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+}
+
+(((slice, int, int, cell)), ()) $SubscriptionContract$_internal_binary_Deploy((slice, int, int, cell) $self, (int) $deploy) impure inline {
+    var ($self'owner, $self'price, $self'balance, $self'subscriptions) = $self;
+    var ($deploy'queryId) = $deploy;
+    ($self'owner, $self'price, $self'balance, $self'subscriptions)~$SubscriptionContract$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
+    return (($self'owner, $self'price, $self'balance, $self'subscriptions), ());
+}
+
+;;
+;; Get methods of a Contract SubscriptionContract
+;;
+
+_ %checkSubscription(slice $user) method_id(121470) {
+    slice $user = __tact_verify_address($user);
+    var self = $SubscriptionContract$_contract_load();
+    var res = self~$SubscriptionContract$_fun_checkSubscription($user);
+    return res;
+}
+
+_ %getExpiryTime(slice $user) method_id(94419) {
+    slice $user = __tact_verify_address($user);
+    var self = $SubscriptionContract$_contract_load();
+    var res = self~$SubscriptionContract$_fun_getExpiryTime($user);
+    return res;
+}
+
+_ %getPrice() method_id(73359) {
+    var self = $SubscriptionContract$_contract_load();
+    var res = self~$SubscriptionContract$_fun_getPrice();
+    return res;
+}
+
+_ %getBalance() method_id(106323) {
+    var self = $SubscriptionContract$_contract_load();
+    var res = self~$SubscriptionContract$_fun_getBalance();
+    return res;
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract SubscriptionContract
+;;
+
+((slice, int, int, cell), int) $SubscriptionContract$_contract_router_internal((slice, int, int, cell) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive UpdatePrice message
+    if (op == 612259693) {
+        var msg = in_msg~$UpdatePrice$_load();
+        self~$SubscriptionContract$_internal_binary_UpdatePrice(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Withdraw message
+    if (op == 195467089) {
+        var msg = in_msg~$Withdraw$_load();
+        self~$SubscriptionContract$_internal_binary_Withdraw(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Subscribe message
+    if (op == 1550988333) {
+        var msg = in_msg~$Subscribe$_load();
+        self~$SubscriptionContract$_internal_binary_Subscribe(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Deploy message
+    if (op == 2490013878) {
+        var msg = in_msg~$Deploy$_load();
+        self~$SubscriptionContract$_internal_binary_Deploy(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $SubscriptionContract$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$SubscriptionContract$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $SubscriptionContract$_contract_store(self);
+}
